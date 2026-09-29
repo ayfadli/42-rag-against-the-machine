@@ -1,0 +1,49 @@
+# =========================
+# Python Artifacts
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# =========================
+# Environments (uv, venv)
+# =========================
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Type Checking & Linting
+# =========================
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# =========================
+# Project Specific Data
+# =========================
+# Ignore everything inside these data folders so you don't commit gigabytes of data,
+# but you can add a .gitkeep file inside them later if you want to push empty folders.
+data/raw/*
+data/processed/*
+data/datasets/*
+data/output/*
+
+# Keep the data folder structure (optional: if you add empty .gitkeep files to these folders)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/datasets/.gitkeep
+!data/output/.gitkeep
+
+# =========================
+# IDEs & Editors
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+test.py
