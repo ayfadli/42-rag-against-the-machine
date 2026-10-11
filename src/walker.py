@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List
 
 def find_target_files(directory_path: str, allowed_extension: List[str]) -> List[str]:
     file_names = []
