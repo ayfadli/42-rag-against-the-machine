@@ -1,13 +1,21 @@
 import requests
 import json
 import os
+from dotenv import load_dotenv
 
-def ask_llm(prompt: str) -> str:
+def ask_llm(prompt: str, model: str = "Qwen/Qwen3-0.6B") -> str:
     
-    url = "https://localhost:11434/v1/chat/completions"
+   load_dotenv()
+ 
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return "Error: GROQ_API_KEY environement variable is missing."
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
 
     headers = {
-        'Content-type': 'application/json'
+        'Content-type': 'application/json',
+        "Authorization": f"Bearer {api_key}"
     }
 
     payload = {

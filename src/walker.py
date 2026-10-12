@@ -1,12 +1,19 @@
 from pathlib import Path
 from typing import List
 
-def find_target_files(directory_path: str, allowed_extension: List[str]) -> List[str]:
+IGNORED_DIRS: Set[str] = {".git", "__pycache__", ".venv", "venv", "build", "dist", "egg-info"}
+
+def find_target_files(directory_path: str, allowed_extensions: List[str]) -> List[str]:
+    base_path = Path(directory_path)
+    allowed_set = {ext.lower() for ext in allowed_extensions}
     file_names = []
-    for item in Path(directory_path).rglob("*"):
-        if item.is_file() and item.suffix in allowed_extension:
+
+    for item in base_path.rglob("*"):
+        if any(part.startswith(".") or part in IGNORED_DIRS for part in item.parts):
+            continue
+
+        if item.is_file() and item.suffix.lower() in allowed_set:
             file_names.append(str(item))
-            # print(str(item))
 
     return file_names
 
