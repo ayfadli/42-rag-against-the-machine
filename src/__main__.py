@@ -1,10 +1,11 @@
+import argparse
+import json
+from pathlib import Path
+
 import walker, indexing
 from index import chunk_text_with_overlap
 from walker import find_target_files
 from retriever.search import search
-
-from pathlib import Path
-import json
 
 def load_database(filepath: str = "data/processed/database.json"):
     try:
@@ -15,7 +16,10 @@ def load_database(filepath: str = "data/processed/database.json"):
 
 
 def main():
-    pass
+    parser = argparse.ArgumentParser(description="RAG CLI")
+
+    subparsers = parser.add_subparsers(dest="command ", required=True)
+
 
 if __name__ == "__main__":
     main()
