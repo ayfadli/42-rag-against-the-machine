@@ -1,5 +1,7 @@
 from src.walker import find_target_files 
 from src.indexer.index import chunk_text_with_overlap
+from pathlib import Path
+import json
 
 def build_database():
     file_names = find_target_files("data/raw/vllm-0.10.1/", [".py", ".md"])

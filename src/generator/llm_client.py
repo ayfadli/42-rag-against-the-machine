@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 def ask_llm(prompt: str, model: str = "Qwen/Qwen3-0.6B") -> str:
     
-   load_dotenv()
+    load_dotenv()
  
     api_key = os.getenv("GROQ_API_KEY")
     if not api_key:

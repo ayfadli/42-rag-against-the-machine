@@ -15,6 +15,7 @@ env/
 ENV/
 .env
 
+
 # =========================
 # Type Checking & Linting
 # =========================
@@ -48,3 +49,6 @@ data/output/*
 .DS_Store
 
 test.py
+en.subject.pdf
+.claude/
+skills-lock.json

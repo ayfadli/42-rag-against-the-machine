@@ -1,5 +1,6 @@
 from typing import List, Dict, Any 
-import indexing
+from src/indexer import index
+
 
 
 def search(query: str, database: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:

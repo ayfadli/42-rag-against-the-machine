@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List
+from typing import List, Set
 
 IGNORED_DIRS: Set[str] = {".git", "__pycache__", ".venv", "venv", "build", "dist", "egg-info"}
 
@@ -16,5 +16,3 @@ def find_target_files(directory_path: str, allowed_extensions: List[str]) -> Lis
             file_names.append(str(item))
 
     return file_names
-
-find_target_files("data/", [".md", ".py"])
