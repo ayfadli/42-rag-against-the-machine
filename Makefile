@@ -10,7 +10,7 @@ debug:
 	uv run python -m pdb -m src/
 
 clean:
-	find . -type d -name "__pycahche__" -exec rm -rf {} +
+	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
 	rm -rf data/processed/*
 	rm -rf data/output/*

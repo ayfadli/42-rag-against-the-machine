@@ -4,4 +4,8 @@ version = "0.1.0"
 description = "A custom Retrieval-Augmented Generation (RAG) pipeline built in Python that indexes the vLLM codebase and uses a local Qwen model to accurately answer developer questions."
 dependencies = [
     "fire>=0.7.1",
+    "pydantic>=2.14.1",
+    "torch>=2.14.1",
+    "tqdm>=4.70.1",
+    "transformers>=5.19.0",
 ]
