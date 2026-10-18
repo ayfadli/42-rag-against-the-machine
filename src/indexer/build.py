@@ -18,7 +18,7 @@ def build_database(
     for file in file_names:
         try:
             with open (file, encoding="utf-8", newline="") as f:  
-                raw_text = Path(f).read_text()
+                raw_text = f.read()
 
             file_chunks = chunk_text_with_overlap(raw_text, chunk_size, overlap)
 
@@ -32,7 +32,9 @@ def build_database(
 
 
     print(f"Success! Generated {len(all_chunks)} total chunks.")
-    with open("database.json", 'w', encoding="utf-8") as output:
+
+    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w', encoding="utf-8") as output:
         json.dump(all_chunks, output, indent=2)
 
     print(f"Database saved to '{output_path}'.")

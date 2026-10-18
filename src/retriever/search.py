@@ -5,7 +5,7 @@ def search(query: str, database: List[Dict[str, Any]], top_k: int = 5) -> List[D
     corpus = [chunk['text'] for chunk in database]
 
     for chunk in database:
-        chunk['text'] = index.score_document(query, chunk['score'], corpus)
+        chunk['score'] = index.score_document(query, chunk['text'], corpus)
 
     sorted_database = sorted(database, key=lambda x: x['score'], reverse=True)
 
