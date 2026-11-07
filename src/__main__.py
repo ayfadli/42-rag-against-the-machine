@@ -42,10 +42,12 @@ class RAGCli:
         target_proc = Path(processed_dir) if processed_dir else self.processed_dir
 
         try:
-            if not Path(target_raw).is_file:
+            if not Path(target_raw).is_dir():
                 print(f"The file '{target_raw}' not found.")
                 return
             target_files = find_target_files(target_raw, [".md", ".py"])
+            output_file = target_raw + "/database.json"
+            build_database(output_file, target_files, max_chunk_size)
 
         except Exception as e:
             print(f"Error during indexing: {e}")

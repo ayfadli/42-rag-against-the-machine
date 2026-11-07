@@ -1,6 +1,8 @@
 from typing import Dict, List, Any
 from collections import Counter
 import math
+import ast
+from rich import print
 
 def compute_tf(text: str) -> Dict[str, float]:
     tokens = text.lower().split()
@@ -36,27 +38,3 @@ def score_document(query: str, document: str, corpus: List[str]) -> float:
         total_score += doc_tf.get(token, 0) * corpus_idf.get(token, 0)
 
     return total_score
-
-def chunk_text_with_overlap(text: str, chunk_size: int, overlap: int) -> List[Dict[str, Any]]:
-    if not text:
-        return []
-    if overlap >= chunk_size:
-        raise ValueError("The overlap value cannot be greater or equal to the chunk size.")
-    
-    i = 0
-    chunks = []
-
-    while i < len(text):
-        end_idx = min(chunk_size + i, len(text))
-        chunks.append({
-            'text': text[i:end_idx],
-            'start': i,
-            'end': end_idx
-        })
-        
-        if end_idx == len(text):
-            break
-            
-        i += chunk_size - overlap
-
-    return chunks

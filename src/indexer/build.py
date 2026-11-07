@@ -23,7 +23,8 @@ def build_database(
             file_chunks = chunk_text_with_overlap(raw_text, chunk_size, overlap)
 
             for chunk in file_chunks:
-                chunk['filepath'] = file
+                chunk['file_path'] = file
+                
 
             all_chunks.extend(file_chunks)
 

@@ -48,7 +48,8 @@ data/output/*
 *.swo
 .DS_Store
 
-test.py
+# test.py
 en.subject.pdf
 .claude/
 skills-lock.json
+.obsidian
