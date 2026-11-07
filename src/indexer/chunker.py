@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 import ast
 from rich import print
+import re
 
 class BaseChunker(ABC):
     def __init__(self, max_chunk_size: int = 2000):
@@ -13,7 +14,7 @@ class BaseChunker(ABC):
 
 class PythonChunker(BaseChunker):
     def chunk(self, raw_text: str) -> List[Dict[str, Any]]:
-
+ 
         tree = ast.parse(raw_text)
         lines = raw_text.splitlines(keepends=True)
         max_chunk_size = self.max_chunk_size
@@ -96,7 +97,15 @@ class PythonChunker(BaseChunker):
 
 class MarkdownChunker(BaseChunker):
     def chunk(self, text: str) -> List[Dict[str, Any]]:
-        pass
+        intro = text.split('#', 1)[0].strip()
+
+        raw_sections = text.split(intro, 1)[1] if intro else text
+
+        sections = re.split(r'(?=^#{1,6}\s+)', raw_sections.strip(), flags=re.MULTILINE)
+        
+        sections[0] = intro
+        return (sections)
+
 
 def chunk_text(target_files: list[str], max_chunk_size: int) -> List[Dict[str, Any]]:
     chunks = []
@@ -107,3 +116,37 @@ def chunk_text(target_files: list[str], max_chunk_size: int) -> List[Dict[str, A
             chunks.chunk_python_code(file, max_chunk_size)
 
     return chunks
+
+
+if __name__ == "__main__":
+    sample_md = """This is intro content before any heading.
+It has no heading above it, just raw text.
+
+## Installation
+
+You can install vLLM with pip.
+Run: pip install vllm
+
+## Usage
+
+Here is how you use it.
+Example code goes here.
+
+### Advanced Usage
+
+This is a long subsection that is intentionally very long so that it exceeds the max_chunk_size limit.
+Line after line of content to make it big enough to trigger the split logic.
+More content here to push it over the limit.
+Even more content to make absolutely sure it goes past the max_chunk_size threshold.
+Adding yet another line just to be safe about hitting the size limit we set.
+"""
+
+    chunker = MarkdownChunker(max_chunk_size=100)
+    chunks = chunker.chunk(sample_md)
+
+    for i, chunk in enumerate(chunks):
+        print(f"\n--- Chunk {i + 1} ---")
+        print(f"start: {chunk.get('first_character_index')}")
+        print(f"end  : {chunk.get('last_character_index')}")
+        print(f"len  : {chunk.get('last_character_index') - chunk.get('first_character_index')}")
+        print(f"text : {repr(chunk.get('text', '')[:80])}")
