@@ -1,5 +1,3 @@
-import argparse
-import json
 from pathlib import Path
 import fire
 
@@ -32,9 +30,11 @@ class RAGCli:
             raw_dir: str | None = None,
             processed_dir: str | None = None
             ) -> None:
-        if max_chunk_size <= 0 or max_chunk_size > 2000:
-            print("Error: max_chunk_size must be between 1 and 2000 characters.")
-            return
+
+        if isinstance(max_chunk_size, int):
+            if max_chunk_size <= 0 or max_chunk_size > 2000:
+                print("Error: max_chunk_size must be between 1 and 2000 characters.")
+                return
 
         target_raw = Path(raw_dir) if raw_dir else self.raw_dir
         target_proc = Path(processed_dir) if processed_dir else self.processed_dir
@@ -44,19 +44,10 @@ class RAGCli:
                 print(f"The file '{target_raw}' not found.")
                 return
             target_files = find_target_files(target_raw, [".md", ".py"])
-            output_file = target_raw + "/database.json"
-            build_database(output_file, target_files, max_chunk_size)
+            build_database(target_files, max_chunk_size, str(target_proc))
 
         except Exception as e:
             print(f"Error during indexing: {e}")
-
-
-# def load_database(filepath: str = "data/processed/database.json"):
-#     try:
-#         with open (filepath, 'r', encoding="utf-8") as f:
-#             return json.load(f)
-#     except FileNotFoundError:
-#         print(f"Error: {filepath} not found. Run 'python3 -m src index' first!")
 
 
 def main():

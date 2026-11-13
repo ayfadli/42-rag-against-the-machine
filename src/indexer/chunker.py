@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
-import ast
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
 
@@ -21,7 +20,7 @@ class PythonChunker(BaseChunker):
             add_start_index=True
             )
 
-        return splitter.create_documents()
+        return splitter.create_documents([raw_text])
 
 class MarkdownChunker(BaseChunker):
     def chunk(self, text: str) -> List[Dict[str, Any]]:
@@ -32,7 +31,7 @@ class MarkdownChunker(BaseChunker):
             add_start_index=True
         )
 
-        return splitter.create_documents()
+        return splitter.create_documents([text])
 
 def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
     with open(file_path, encoding="utf-8", newline="") as f:
@@ -46,7 +45,7 @@ def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
     docs = chunker.chunk(raw_text)
     chunks = []
     for doc in docs:
-        chunk = []
+        chunk = {}
         chunk['text'] = doc.page_content
         chunk['first_character_index'] = doc.metadata['start_index']
         chunk["last_character_index"] = doc.metadata["start_index"] + len(doc.page_content)
