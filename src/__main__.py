@@ -3,7 +3,7 @@ import fire
 
 from src.indexer.build import build_database
 from src.walker import find_target_files
-from src.retriever.search import search
+from src.retriever.search import retrieve_sources
 
 
 class RAGCli:
@@ -32,7 +32,7 @@ class RAGCli:
             ) -> None:
 
         if isinstance(max_chunk_size, bool) or not isinstance(max_chunk_size, int):
-            print(f"The max_chunk_size must be an integer.")
+            print("The max_chunk_size must be an integer.")
             return
 
         if max_chunk_size <= 0 or max_chunk_size > 2000:
@@ -51,6 +51,11 @@ class RAGCli:
 
         except Exception as e:
             print(f"Error during indexing: {e}")
+
+    def search(self, query: str, k: int = 10) -> None:
+        self._validate_query_and_k(query, k)
+        retrieve_sources(query, k, str(self.processed_dir))
+
 
 
 def main():

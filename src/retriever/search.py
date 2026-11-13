@@ -1,12 +1,5 @@
-from typing import List, Dict, Any 
+from typing import List, Dict, Any
 from src.indexer import index
 
-def search(query: str, database: List[Dict[str, Any]], top_k: int = 5) -> List[Dict[str, Any]]:
-    corpus = [chunk['text'] for chunk in database]
-
-    for chunk in database:
-        chunk['score'] = index.score_document(query, chunk['text'], corpus)
-
-    sorted_database = sorted(database, key=lambda x: x['score'], reverse=True)
-
-    return sorted_database[:top_k]
+def retrieve_sources(query: str, top_k: int, processed_dir: str) -> List[Dict[str, Any]]:
+    pass
