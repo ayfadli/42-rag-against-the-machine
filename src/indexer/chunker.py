@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 import ast
-from rich import print
 
 class BaseChunker(ABC):
     def __init__(self, max_chunk_size: int = 2000):
@@ -14,8 +13,12 @@ class BaseChunker(ABC):
 class PythonChunker(BaseChunker):
     def chunk(self, raw_text: str) -> List[Dict[str, Any]]:
 
-        tree = ast.parse(raw_text)
+
         lines = raw_text.splitlines(keepends=True)
+        try:
+            tree = ast.parse(raw_text)
+        except (SyntaxError, ValueError):
+            return self._split_oversized_node(lines, 0)
         max_chunk_size = self.max_chunk_size
     
         current_pos = 0
@@ -29,19 +32,21 @@ class PythonChunker(BaseChunker):
         chunks = [{}]
     
         for node in tree.body:
-            start_line = node.lineno
+            decorators = getattr(node, 'decorator_list', [])
+            start_line = min([node.lineno] + [d.lineno for d in decorators])
             end_line = node.end_lineno
     
             node_lines = lines[start_line-1: end_line]
             node_text = ''.join(node_lines)
     
-            first_character_index = line_starts[node.lineno - 1]
+            first_character_index = line_starts[start_line - 1]
             last_character_index = first_character_index + len(node_text)
     
             current_chunk = chunks[i]
-            node_text = raw_text[first_character_index : last_character_index] 
-    
-            if len(node_text) + len(current_chunk.get('text', "")) <= max_chunk_size:
+            node_text = raw_text[first_character_index : last_character_index]
+
+            start = current_chunk.get('first_character_index', first_character_index)
+            if last_character_index - start <= max_chunk_size:
                 if current_chunk.get('first_character_index') is None:
                     current_chunk['first_character_index'] = first_character_index
     
@@ -71,39 +76,72 @@ class PythonChunker(BaseChunker):
 
 
         sub_chunks = []
-        total_len = sum(len(s) for s in node_lines)
         curr_len = 0
         max_chunk_size = self.max_chunk_size
 
-        i = 0
-        chunk = dict()
-        chunk['first_character_index'] = start_character_index
-        while (curr_len < total_len and i < len(node_lines)):
-            line = node_lines[i]
-            if len(chunk.get('text', '')) + len(line) <= max_chunk_size:
-                chunk['text'] = chunk.get('text', '') + line
-                curr_len += len(line)
-                chunk['last_character_index'] = start_character_index + curr_len
-                i += 1
+        chunk = {'first_character_index': start_character_index, 'text': ''}
+
+        for line in node_lines:
+            line_start = start_character_index + curr_len
+
+            if len(line) > max_chunk_size:
+                if chunk['text']:
+                    sub_chunks.append(chunk)
+
+                for k in range(0, len(line), max_chunk_size):
+                    piece = line[k: k + max_chunk_size]
+                    sub_chunks.append({
+                        'text': piece,
+                        'first_character_index': line_start + k,
+                        'last_character_index': line_start + k + len(piece) 
+                    })
+
+                chunk = {'first_character_index': line_start + len(line), 'text': ''}
+            elif len(chunk['text']) + len(line) <= max_chunk_size:
+                chunk['text'] += line
+                chunk['last_character_index'] = line_start + len(line)
             else:
                 sub_chunks.append(chunk)
-                chunk = dict()
-                chunk['first_character_index'] = start_character_index + curr_len
-        else:
-            sub_chunks.append(chunk)
+                chunk = {
+                    'text': line,
+                    'first_character_index': line_start,
+                    'last_character_index': line_start + len(line)
+                }
+            curr_len += len(line)
 
+        if chunk['text']:
+            sub_chunks.append(chunk)
         return sub_chunks
 
 class MarkdownChunker(BaseChunker):
     def chunk(self, text: str) -> List[Dict[str, Any]]:
-        pass
+        lines = text.splitlines(keepends=True)
+        sections = []
+        section_start = 0
+        pos = 0
+        in_code_block = False
 
-def chunk_text(target_files: list[str], max_chunk_size: int) -> List[Dict[str, Any]]:
-    chunks = []
-    for file in target_files:
-        if file.endswith('.md'):
-            pass
-        else:
-            chunks.chunk_python_code(file, max_chunk_size)
+        for line in lines:
+            if line.lstrip().startswith("```"):
+                in_code_block = not in_code_block
+            elif not in_code_block and line.startswith('#') and pos != section_start:
+                sections.append((section_start), pos)
+                section_start = pos
+            pos += len(line)
+
+        sections.append((section_start), pos)
+
+def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
+    with open(file_path, encoding="utf-8", newline="") as f:
+        raw_text = f.read()
+
+    if file_path.endswith('.py'):
+        chunker = PythonChunker(max_chunk_size)
+    else:
+        chunker = MarkdownChunker(max_chunk_size)
+
+    chunks = chunker.chunk(raw_text)
+    for chunk in chunks:
+        chunk["file_path"] = file_path
 
     return chunks

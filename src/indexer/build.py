@@ -13,6 +13,7 @@ def build_database(
 
     # file_names = find_target_files("data/raw/vllm-0.10.1/", [".py", ".md"])
     # print(f"Found {len(file_names)} files. Chunking...")
+
     all_chunks = []
 
     for file in file_names:

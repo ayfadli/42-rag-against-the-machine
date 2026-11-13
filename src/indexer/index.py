@@ -2,7 +2,6 @@ from typing import Dict, List, Any
 from collections import Counter
 import math
 import ast
-from rich import print
 
 def compute_tf(text: str) -> Dict[str, float]:
     tokens = text.lower().split()
