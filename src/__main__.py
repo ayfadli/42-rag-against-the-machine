@@ -53,7 +53,9 @@ class RAGCli:
             print(f"Error during indexing: {e}")
 
     def search(self, query: str, k: int = 10) -> None:
-        self._validate_query_and_k(query, k)
+        if not self._validate_query_and_k(query, k):
+            return
+
         retrieve_sources(query, k, str(self.processed_dir))
 
 

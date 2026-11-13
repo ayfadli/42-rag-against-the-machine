@@ -9,13 +9,20 @@ def retrieve_sources(query: str, top_k: int, processed_dir: str) -> List[Dict[st
         retriever = bm25s.BM25.load(processed_dir, load_corpus=True)
     except (OSError, ValueError) as e:
         print(f"Error: {e}")
-        return
+        return []
+
+    sources = []
 
     query_tokens = bm25s.tokenize([query], stopwords="en")
-
     results, scores = retriever.retrieve(query_tokens, k=top_k)
 
-    print(results[0])
-    print("\n\n\n")
-    print(scores[0])
+    for chunk, score in zip(results[0], scores[0]):
+        if score == 0:
+            continue
+        minimal_source = MinimalSource(file_path=chunk['file_path'],
+                                       first_character_index = chunk['first_character_index'],
+                                       last_character_index = chunk['last_character_index'])
+        sources.append(minimal_source)
+
+    return sources
 
