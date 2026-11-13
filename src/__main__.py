@@ -31,7 +31,7 @@ class RAGCli:
             processed_dir: str | None = None
             ) -> None:
 
-        if not isinstance(max_chunk_size, int):
+        if isinstance(max_chunk_size, bool) or not isinstance(max_chunk_size, int):
             print(f"The max_chunk_size must be an integer.")
             return
 
