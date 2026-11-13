@@ -3,6 +3,7 @@ name = "rag-against-machine"
 version = "0.1.0"
 description = "A custom Retrieval-Augmented Generation (RAG) pipeline built in Python that indexes the vLLM codebase and uses a local Qwen model to accurately answer developer questions."
 dependencies = [
+    "bm25>=0.3.16",
     "fire>=0.7.1",
     "langchain-text-splitters>=1.1.3",
     "pydantic>=2.14.1",

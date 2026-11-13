@@ -3,12 +3,10 @@ import json
 from pathlib import Path
 import fire
 
-from src.indexer.index import chunk_text_with_overlap
 from src.indexer.build import build_database
 from src.walker import find_target_files
 from src.retriever.search import search
-from src.generator.llm_client import ask_llm
-from src.generator.prompt_builder import build_prompt
+
 
 class RAGCli:
     def __init__(self,
