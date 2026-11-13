@@ -14,25 +14,25 @@ class BaseChunker(ABC):
 
 class PythonChunker(BaseChunker):
     def chunk(self, raw_text: str) -> List[Dict[str, Any]]:
-        splitter = RecursiveCharacterTextSplitter(
-            language=Language.PYTHON
+        splitter = RecursiveCharacterTextSplitter.from_language(
+            language=Language.PYTHON,
             chunk_size=self.max_chunk_size,
             chunk_overlap=0,
             add_start_index=True
             )
 
-        return splitter.create_documents
+        return splitter.create_documents()
 
 class MarkdownChunker(BaseChunker):
     def chunk(self, text: str) -> List[Dict[str, Any]]:
-        splitter = RecursiveCharacterTextSplitter(
+        splitter = RecursiveCharacterTextSplitter.from_language(
             language=Language.MARKDOWN,
             chunk_size=self.max_chunk_size,
             chunk_overlap=0,
             add_start_index=True
         )
 
-        return splitter.create_documents
+        return splitter.create_documents()
 
 def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
     with open(file_path, encoding="utf-8", newline="") as f:
@@ -43,9 +43,13 @@ def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
     else:
         chunker = MarkdownChunker(max_chunk_size)
 
-    chunks = chunker.chunk(raw_text)
-    for chunk in chunks:
+    docs = chunker.chunk(raw_text)
+    chunks = []
+    for doc in docs:
+        chunk = []
+        chunk['text'] = doc.page_conten t
+        chunk['first_character_index'] = doc.metadata['start_index']
+        chunk["last_character_index"] = doc.metadata["start_index"] + len(doc.page_content)
         chunk["file_path"] = file_path
-        chunk["last_character_index"] = chunk.metadata["start_index"] + len(chunk.page_content)
 
     return chunks
