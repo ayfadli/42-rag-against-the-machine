@@ -31,10 +31,13 @@ class RAGCli:
             processed_dir: str | None = None
             ) -> None:
 
-        if isinstance(max_chunk_size, int):
-            if max_chunk_size <= 0 or max_chunk_size > 2000:
-                print("Error: max_chunk_size must be between 1 and 2000 characters.")
-                return
+        if not isinstance(max_chunk_size, int):
+            print(f"The max_chunk_size must be an integer.")
+            return
+
+        if max_chunk_size <= 0 or max_chunk_size > 2000:
+            print("Error: max_chunk_size must be between 1 and 2000 characters.")
+            return
 
         target_raw = Path(raw_dir) if raw_dir else self.raw_dir
         target_proc = Path(processed_dir) if processed_dir else self.processed_dir
