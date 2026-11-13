@@ -47,9 +47,10 @@ def chunk_file(file_path: str, max_chunk_size: int) -> List[Dict[str, Any]]:
     chunks = []
     for doc in docs:
         chunk = []
-        chunk['text'] = doc.page_conten t
+        chunk['text'] = doc.page_content
         chunk['first_character_index'] = doc.metadata['start_index']
         chunk["last_character_index"] = doc.metadata["start_index"] + len(doc.page_content)
         chunk["file_path"] = file_path
+        chunks.append(chunk)
 
     return chunks
