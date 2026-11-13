@@ -1,5 +1,5 @@
 from src.indexer import chunker
-import tqdm
+from tqdm import tqdm
 from typing import List
 import bm25s
 import sys
