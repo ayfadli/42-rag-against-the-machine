@@ -56,9 +56,9 @@ class RAGCli:
         if not self._validate_query_and_k(query, k):
             return
 
-        retrieve_sources(query, k, str(self.processed_dir))
-
-
+        sources = retrieve_sources(query, k, str(self.processed_dir))
+        for source in sources:
+            print(f"{source.file_path} [{source.first_character_index}:{source.last_character_index}]")
 
 def main():
   fire.Fire(RAGCli)
