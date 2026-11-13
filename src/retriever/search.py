@@ -1,5 +1,4 @@
 from typing import List, Dict, Any
-from src.indexer import index
 import bm25s
 from src.models import MinimalSource
 from rich import print
