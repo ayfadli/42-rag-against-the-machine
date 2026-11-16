@@ -1,4 +1,5 @@
 from src.indexer import chunker
+from src.indexer.text_prep import prepare_for_index
 from tqdm import tqdm
 from typing import List
 import bm25s
@@ -23,8 +24,7 @@ def build_database(
         print("No chunks available.", file=sys.stderr)
         return
 
-    texts = [chunk['text'] for chunk in all_chunks]
-
+    texts = [prepare_for_index(chunk['text'], chunk['file_path']) for chunk in all_chunks]
     tokens = bm25s.tokenize(texts, stopwords="en")
 
     retriever = bm25s.BM25()

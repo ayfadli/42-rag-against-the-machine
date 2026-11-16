@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
-
 class BaseChunker(ABC):
     def __init__(self, max_chunk_size: int = 2000):
         self.max_chunk_size = max_chunk_size

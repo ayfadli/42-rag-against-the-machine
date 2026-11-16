@@ -2,18 +2,24 @@ from typing import List, Dict, Any
 import bm25s
 from src.models import MinimalSource
 from rich import print
+from src.indexer.text_prep import prepare_query
 
-def retrieve_sources(query: str, top_k: int, processed_dir: str) -> List[Dict[str, Any]]:
+def load_retriever(processed_dir: str) -> bm25s.BM25 | None:
+    """Load the BM25 index and its corpus once. Return None if missing."""
     try:
-        retriever = bm25s.BM25.load(processed_dir, load_corpus=True)
+        return bm25s.BM25.load(processed_dir ,load_corpus=True)
     except (OSError, ValueError) as e:
-        print(f"Error: {e}")
-        return []
+        print(f"Error: cannot load index from '{processed_dir}' ({e}). "
+            f"Run 'index' first.")
+        return None
+        
+def retrieve_sources(retriever: bm25s.BM25, query: str,
+                     k: int) -> List[MinimalSource]:
+    k = min(k, len(retriever.corpus))
 
     sources = []
-
-    query_tokens = bm25s.tokenize([query], stopwords="en")
-    results, scores = retriever.retrieve(query_tokens, k=top_k)
+    query_tokens = bm25s.tokenize([prepare_query(query)], stopwords="en", show_progress=False)
+    results, scores = retriever.retrieve(query_tokens, k=k, show_progress=False)
 
     for chunk, score in zip(results[0], scores[0]):
         if score == 0:

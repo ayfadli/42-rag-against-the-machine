@@ -1,10 +1,15 @@
 from pathlib import Path
 import fire
+from pydantic import ValidationError
+from tqdm import tqdm
+from typing import List
 
+from src.models import (MinimalSearchResults, StudentSearchResults)
 from src.indexer.build import build_database
 from src.walker import find_target_files
-from src.retriever.search import retrieve_sources
-
+from src.retriever.search import (retrieve_sources, load_retriever)
+from src.io_utils import load_dataset
+from src.io_utils import save_json
 
 class RAGCli:
     def __init__(self,
@@ -16,12 +21,17 @@ class RAGCli:
     def _validate_query_and_k(self, query: str, k: int):
         query = str(query).strip()
         if not isinstance(query, str) or not query:
-            print("Error: Quey must be a non-empty string.")
+            print("Error: Query must be a non-empty string.")
             return False
         if not isinstance(k, int) or k <= 0 or isinstance(k, bool):
             print("Error: k must be a positive number greater than or equal to 1.")
             return False
 
+        return True
+    def _validate_k(self, k: int) -> bool:
+        if not isinstance(k, int) or k <= 0:
+            print("Error: k must be a positive integer (>= 1).")
+            return False
         return True
 
     def index(
@@ -55,10 +65,37 @@ class RAGCli:
     def search(self, query: str, k: int = 10) -> None:
         if not self._validate_query_and_k(query, k):
             return
+        retriver = load_retriever(str(self.processed_dir))
+        if not retriver:
+            return
 
-        sources = retrieve_sources(query, k, str(self.processed_dir))
+        sources = retrieve_sources( retriver, str(query).strip(), k)
         for source in sources:
             print(f"{source.file_path} [{source.first_character_index}:{source.last_character_index}]")
+
+    def search_dataset(self, dataset_path: str = "", k: int = 10, save_directory: str = "data/output/search_results") -> None:
+        """Search every question of a dataset and save StudentSearchResults."""
+        if not self._validate_k(k):
+            return
+        dataset = load_dataset(dataset_path)
+        if dataset is None:
+            return None
+        retriver = load_retriever(str(self.processed_dir))
+        if retriver is None:
+            return
+
+        results: List[MinimalSearchResults] = []
+        for q in tqdm(dataset.rag_questions, desc="Searching", unit='q'):
+            results.append(MinimalSearchResults(
+                question_id=q.question_id,
+                question = q.question,
+                retrieved_sources=retrieve_sources(retriver, q.question, k)
+            ))
+
+        output = StudentSearchResults(search_results=results, k=k)
+        out_path = Path(save_directory) / Path(dataset_path).name
+        save_json(out_path, output.model_dump_json(indent=2))
+        print(f"Saved student_search_results to {out_path}")
 
 def main():
   fire.Fire(RAGCli)
